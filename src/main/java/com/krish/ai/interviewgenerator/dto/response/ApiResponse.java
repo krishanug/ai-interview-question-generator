@@ -18,7 +18,7 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> success(T data) {
         return ApiResponse.<T>builder()
                 .success(true)
-                .message("Request processed successfully")
+                .message("Questions generated successfully")
                 .data(data)
                 .timestamp(LocalDateTime.now())
                 .build();
