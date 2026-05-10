@@ -17,6 +17,6 @@ public class QuestionGenerationRequest {
     private Difficulty difficulty;
 
     @Min(1)
-    @Max(20)
-    private Integer count;
+    @Max(value = 10, message = "questionCount must be less than or equal to 10")
+    private Integer questionCount;
 }

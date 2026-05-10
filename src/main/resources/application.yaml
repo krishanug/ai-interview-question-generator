@@ -1,6 +1,16 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: interview-question-generator
+  ai:
+    google:
+      genai:
+        api-key: ${GEMINI_API_KEY:}
+        chat:
+          options:
+            model: gemini-2.5-flash
+            temperature: 0.4
 
 logging:
   level:
@@ -8,3 +18,7 @@ logging:
 
 server:
   port: 8080
+
+app:
+  ai:
+    timeout-seconds: 30
