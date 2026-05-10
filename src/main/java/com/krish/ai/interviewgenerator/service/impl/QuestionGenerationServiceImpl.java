@@ -1,16 +1,16 @@
 package com.krish.ai.interviewgenerator.service.impl;
 
 import com.krish.ai.interviewgenerator.dto.request.QuestionGenerationRequest;
+import com.krish.ai.interviewgenerator.service.AiResponseParserService;
 import com.krish.ai.interviewgenerator.service.PromptBuilderService;
 import com.krish.ai.interviewgenerator.service.QuestionGenerationService;
+import com.krish.ai.interviewgenerator.service.QuestionValidationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -18,12 +18,18 @@ public class QuestionGenerationServiceImpl implements QuestionGenerationService 
 
     private final ObjectProvider<ChatClient.Builder> chatClientBuilderProvider;
     private final PromptBuilderService promptBuilderService;
+    private final AiResponseParserService aiResponseParserService;
+    private final QuestionValidationService questionValidationService;
 
     public QuestionGenerationServiceImpl(
             ObjectProvider<ChatClient.Builder> chatClientBuilderProvider,
-            PromptBuilderService promptBuilderService) {
+            PromptBuilderService promptBuilderService,
+            AiResponseParserService aiResponseParserService,
+            QuestionValidationService questionValidationService) {
         this.chatClientBuilderProvider = chatClientBuilderProvider;
         this.promptBuilderService = promptBuilderService;
+        this.aiResponseParserService = aiResponseParserService;
+        this.questionValidationService = questionValidationService;
     }
 
     @Override
@@ -49,20 +55,10 @@ public class QuestionGenerationServiceImpl implements QuestionGenerationService 
             throw new IllegalStateException("AI returned an empty response");
         }
 
-        List<String> questions = Arrays.stream(content.split("\\R"))
-                .map(String::trim)
-                .filter(line -> !line.isBlank())
-                .map(this::stripNumbering)
-                .limit(request.getQuestionCount())
-                .collect(Collectors.toList());
+        List<String> questions = aiResponseParserService.parseQuestions(content, request.getQuestionCount());
+        questionValidationService.validate(questions, request.getTopic(), request.getQuestionCount());
 
         log.info("Gemini response processed successfully: questionCount={}", questions.size());
         return questions;
-    }
-
-    private String stripNumbering(String line) {
-        return line.replaceFirst("^\\d+[.)]\\s*", "")
-                .replaceFirst("^[-*]\\s*", "")
-                .trim();
     }
 }

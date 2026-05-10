@@ -28,14 +28,21 @@ public class PromptBuilderServiceImpl implements PromptBuilderService {
                 %s
 
                 Output format:
-                - Return only questions.
-                - One question per line.
-                - No markdown, no numbering, no explanations, no headings.
+                - Return strictly valid JSON only.
+                - Do not wrap response in markdown code fences.
+                - JSON shape:
+                  {
+                    "questions": [
+                      { "question": "..." }
+                    ]
+                  }
+                - Exactly %d items in questions array.
                 """.formatted(
                 request.getQuestionCount(),
                 request.getTopic(),
                 request.getDifficulty().name(),
-                difficultyGuideline
+                difficultyGuideline,
+                request.getQuestionCount()
         );
     }
 
