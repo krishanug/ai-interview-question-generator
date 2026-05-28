@@ -19,4 +19,6 @@ public interface QuestionService {
             Difficulty difficulty,
             Integer minRating
     );
+
+    QuestionResponse rateQuestion(Long id, Integer score);
 }

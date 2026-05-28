@@ -2,6 +2,7 @@ package com.krish.ai.interviewgenerator.controller;
 
 import com.krish.ai.interviewgenerator.constants.AppConstants;
 import com.krish.ai.interviewgenerator.dto.request.QuestionGenerationRequest;
+import com.krish.ai.interviewgenerator.dto.request.QuestionRatingRequest;
 import com.krish.ai.interviewgenerator.dto.response.ApiResponse;
 import com.krish.ai.interviewgenerator.dto.response.QuestionPageResponse;
 import com.krish.ai.interviewgenerator.dto.response.QuestionResponse;
@@ -12,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,5 +63,13 @@ public class QuestionController {
                 page, size, sortBy, sortDir, topic, difficulty, minRating);
 
         return ResponseEntity.ok(ApiResponse.success(AppConstants.Messages.QUESTIONS_FETCHED, response));
+    }
+
+    @PatchMapping(AppConstants.ApiPath.RATE)
+    public ResponseEntity<ApiResponse<QuestionResponse>> rateQuestion(
+            @PathVariable Long id,
+            @Valid @RequestBody QuestionRatingRequest request) {
+        QuestionResponse response = questionService.rateQuestion(id, request.getScore());
+        return ResponseEntity.ok(ApiResponse.success(AppConstants.Messages.QUESTION_RATED, response));
     }
 }

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +44,7 @@ public class QuestionServiceImpl implements QuestionService {
                         .difficulty(request.getDifficulty())
                         .type(AppConstants.QuestionDefaults.TYPE_GENERATED)
                         .rating(AppConstants.QuestionDefaults.RATING_DEFAULT)
+                        .ratingCount(0)
                         .build())
                 .toList();
 
@@ -86,6 +88,24 @@ public class QuestionServiceImpl implements QuestionService {
                 .totalElements(resultPage.getTotalElements())
                 .totalPages(resultPage.getTotalPages())
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public QuestionResponse rateQuestion(Long id, Integer score) {
+        QuestionEntity entity = questionRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Question not found for id: " + id));
+
+        int existingRating = entity.getRating() == null ? AppConstants.QuestionDefaults.RATING_DEFAULT : entity.getRating();
+        int existingCount = entity.getRatingCount() == null ? 0 : entity.getRatingCount();
+        int newCount = existingCount + 1;
+        int newAverageRating = Math.round(((existingRating * existingCount) + score) / (float) newCount);
+
+        entity.setRating(newAverageRating);
+        entity.setRatingCount(newCount);
+
+        QuestionEntity updated = questionRepository.saveAndFlush(entity);
+        return toResponse(updated);
     }
 
     private static @NonNull Specification<QuestionEntity> getQuestionEntitySpecification(String topic, Difficulty difficulty, Integer minRating) {

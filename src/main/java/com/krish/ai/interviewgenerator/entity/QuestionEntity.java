@@ -42,4 +42,14 @@ public class QuestionEntity {
     private Instant createdAt;
 
     private Integer rating;
+
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private Integer ratingCount;
+
+    @PrePersist
+    void initializeDefaults() {
+        if (ratingCount == null) {
+            ratingCount = 0;
+        }
+    }
 }

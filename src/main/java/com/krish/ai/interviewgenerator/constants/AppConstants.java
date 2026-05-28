@@ -8,6 +8,7 @@ public final class AppConstants {
     public static final class ApiPath {
         public static final String QUESTIONS_BASE = "/api/v1/questions";
         public static final String GENERATE = "/generate";
+        public static final String RATE = "/{id}/rating";
 
         private ApiPath() {
         }
@@ -30,6 +31,7 @@ public final class AppConstants {
         public static final String REQUEST_PROCESSED = "Request processed successfully";
         public static final String QUESTIONS_GENERATED = "Questions generated successfully";
         public static final String QUESTIONS_FETCHED = "Questions fetched successfully";
+        public static final String QUESTION_RATED = "Question rated successfully";
 
         private Messages() {
         }
@@ -55,6 +57,8 @@ public final class AppConstants {
     public static final class Validation {
         public static final int QUESTION_MIN_LENGTH = 8;
         public static final int QUESTION_MAX_LENGTH = 1000;
+        public static final int RATING_MIN = 1;
+        public static final int RATING_MAX = 5;
 
         private Validation() {
         }
