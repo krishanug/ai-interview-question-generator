@@ -60,6 +60,13 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.failure(ex.getMessage()));
     }
 
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRateLimitExceeded(RateLimitExceededException ex) {
+        log.warn("Request blocked by local rate limiter: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(ApiResponse.failure(ex.getMessage()));
+    }
+
     @ExceptionHandler(HttpStatusCodeException.class)
     public ResponseEntity<ApiResponse<Void>> handleHttpStatusCodeException(HttpStatusCodeException ex) {
         if (ex.getStatusCode().value() == 429 || containsRateLimitOrQuotaSignals(ex.getResponseBodyAsString())) {

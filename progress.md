@@ -11,6 +11,7 @@ Date: 2026-05-28
 - Phase 5: complete (PostgreSQL persistence flow + JPA/repository + Docker Compose added).
 - Phase 6: complete (retrieval APIs + filters/sort + rating endpoint).
 - Phase 7: complete (Redis caching for repeated generation requests).
+- Phase 8: complete (Redis-based API rate limiting).
 
 ### Current File Audit (Workspace)
 
@@ -52,3 +53,9 @@ Potentially useful but optional missing file:
 - Added `@EnableCaching` and Redis cache manager with configurable TTL.
 - Cached AI generation results by topic + difficulty + questionCount.
 - Extended `docker-compose.yml` with Redis service.
+
+### Step 5 Output (Phase 8 Completed)
+
+- Added Redis-based IP rate limiting for `POST /api/v1/questions/generate`.
+- Added configurable limit/window via environment variables.
+- Added dedicated `429` exception handling for local rate limiter.

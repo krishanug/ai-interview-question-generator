@@ -32,6 +32,7 @@ public final class AppConstants {
         public static final String QUESTIONS_GENERATED = "Questions generated successfully";
         public static final String QUESTIONS_FETCHED = "Questions fetched successfully";
         public static final String QUESTION_RATED = "Question rated successfully";
+        public static final String RATE_LIMIT_EXCEEDED = "Rate limit exceeded. Please retry later.";
 
         private Messages() {
         }
@@ -70,6 +71,14 @@ public final class AppConstants {
                 "#request.topic + '_' + #request.difficulty + '_' + #request.questionCount";
 
         private Cache() {
+        }
+    }
+
+    public static final class RateLimit {
+        public static final String REDIS_KEY_PREFIX = "rate_limit:";
+        public static final String HEADER_X_FORWARDED_FOR = "X-Forwarded-For";
+
+        private RateLimit() {
         }
     }
 }

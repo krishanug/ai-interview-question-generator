@@ -40,3 +40,6 @@ app:
     timeout-seconds: 30
   cache:
     questions-ttl-minutes: ${QUESTIONS_CACHE_TTL_MINUTES:30}
+  rate-limit:
+    max-requests-per-window: ${RATE_LIMIT_MAX_REQUESTS:20}
+    window-seconds: ${RATE_LIMIT_WINDOW_SECONDS:60}
