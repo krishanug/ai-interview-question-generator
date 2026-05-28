@@ -12,7 +12,9 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @Slf4j
@@ -48,20 +50,85 @@ public class QuestionGenerationServiceImpl implements QuestionGenerationService 
         String prompt = promptBuilderService.buildQuestionGenerationPrompt(request);
         log.info("Final AI prompt: {}", prompt);
 
-        String content = chatClientBuilder.build()
-                .prompt()
-                .user(prompt)
-                .call()
-                .content();
+        String content = callModel(chatClientBuilder, prompt);
 
         if (content == null || content.isBlank()) {
             throw new IllegalStateException("AI returned an empty response");
         }
 
-        List<String> questions = aiResponseParserService.parseQuestions(content, request.getQuestionCount());
+        List<String> questions = new ArrayList<>(
+                aiResponseParserService.parseQuestions(content, request.getQuestionCount())
+        );
+        questions = improveWeakQuestionsOnce(request, chatClientBuilder, questions);
         questionValidationService.validate(questions, request.getTopic(), request.getQuestionCount());
 
         log.info("Gemini response processed successfully: questionCount={}", questions.size());
         return questions;
+    }
+
+    private List<String> improveWeakQuestionsOnce(
+            QuestionGenerationRequest request,
+            ChatClient.Builder chatClientBuilder,
+            List<String> questions) {
+        List<Integer> weakIndexes = findWeakQuestionIndexes(questions);
+        if (weakIndexes.isEmpty()) {
+            return questions;
+        }
+
+        List<String> weakQuestions = weakIndexes.stream().map(questions::get).toList();
+        String regenerationPrompt = promptBuilderService.buildRegenerationPrompt(
+                request,
+                weakQuestions,
+                weakQuestions.size()
+        );
+
+        String regenerationContent = callModel(chatClientBuilder, regenerationPrompt);
+        if (regenerationContent == null || regenerationContent.isBlank()) {
+            return questions;
+        }
+
+        List<String> regenerated = aiResponseParserService.parseQuestions(regenerationContent, weakQuestions.size());
+        if (regenerated.size() < weakIndexes.size()) {
+            return questions;
+        }
+
+        for (int i = 0; i < weakIndexes.size(); i++) {
+            questions.set(weakIndexes.get(i), regenerated.get(i));
+        }
+
+        log.info("Regenerated weak questions once: weakCount={}", weakIndexes.size());
+        return questions;
+    }
+
+    private List<Integer> findWeakQuestionIndexes(List<String> questions) {
+        return java.util.stream.IntStream.range(0, questions.size())
+                .filter(index -> isWeakQuestion(questions.get(index)))
+                .boxed()
+                .toList();
+    }
+
+    private boolean isWeakQuestion(String question) {
+        if (question == null || question.isBlank()) {
+            return true;
+        }
+
+        String normalized = question.trim();
+        int wordCount = normalized.split("\\s+").length;
+        if (wordCount < AppConstants.Quality.MIN_WORD_COUNT) {
+            return true;
+        }
+
+        String lower = normalized.toLowerCase(Locale.ROOT);
+        return lower.startsWith("what is ")
+                || lower.startsWith("define ")
+                || lower.startsWith("explain ");
+    }
+
+    private String callModel(ChatClient.Builder chatClientBuilder, String prompt) {
+        return chatClientBuilder.build()
+                .prompt()
+                .user(prompt)
+                .call()
+                .content();
     }
 }

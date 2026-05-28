@@ -81,4 +81,11 @@ public final class AppConstants {
         private RateLimit() {
         }
     }
+
+    public static final class Quality {
+        public static final int MIN_WORD_COUNT = 6;
+
+        private Quality() {
+        }
+    }
 }
