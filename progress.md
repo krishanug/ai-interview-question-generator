@@ -9,7 +9,8 @@ Date: 2026-05-28
 - Phase 3: likely complete (prompt builder and validation flow exist).
 - Phase 4: complete (as confirmed; structured output DTOs/parser/validation present).
 - Phase 5: complete (PostgreSQL persistence flow + JPA/repository + Docker Compose added).
-- Phase 6: pending (retrieval APIs with pagination/filter/sort).
+- Phase 6: complete (retrieval APIs + filters/sort + rating endpoint).
+- Phase 7: complete (Redis caching for repeated generation requests).
 
 ### Current File Audit (Workspace)
 
@@ -39,3 +40,15 @@ Potentially useful but optional missing file:
 - Added PostgreSQL datasource + JPA config in `application.yaml` / `application-local.yaml`.
 - Added `docker-compose.yml` with `postgres` and `pgadmin`.
 - Verified build compiles successfully (`mvn test -DskipTests`).
+
+### Step 3 Output (Phase 6 Completed)
+
+- Added `GET /api/v1/questions` with pagination, filtering, and sorting.
+- Added `PATCH /api/v1/questions/{id}/rating` with running-average rating logic.
+
+### Step 4 Output (Phase 7 Completed)
+
+- Added Redis cache integration (`spring-boot-starter-cache`, `spring-boot-starter-data-redis`).
+- Added `@EnableCaching` and Redis cache manager with configurable TTL.
+- Cached AI generation results by topic + difficulty + questionCount.
+- Extended `docker-compose.yml` with Redis service.

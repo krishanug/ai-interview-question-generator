@@ -14,6 +14,10 @@ spring:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/interview_generator_db}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   ai:
     google:
       genai:
@@ -34,3 +38,5 @@ server:
 app:
   ai:
     timeout-seconds: 30
+  cache:
+    questions-ttl-minutes: ${QUESTIONS_CACHE_TTL_MINUTES:30}

@@ -63,4 +63,13 @@ public final class AppConstants {
         private Validation() {
         }
     }
+
+    public static final class Cache {
+        public static final String QUESTIONS_CACHE = "generatedQuestionsCache";
+        public static final String GENERATE_KEY_EXPRESSION =
+                "#request.topic + '_' + #request.difficulty + '_' + #request.questionCount";
+
+        private Cache() {
+        }
+    }
 }
