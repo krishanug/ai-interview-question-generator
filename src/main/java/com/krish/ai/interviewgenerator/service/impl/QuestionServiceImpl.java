@@ -22,6 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,8 +40,15 @@ public class QuestionServiceImpl implements QuestionService {
     public List<QuestionResponse> generateQuestions(
             QuestionGenerationRequest request) {
         List<String> generatedQuestions = questionGenerationService.generate(request);
+        List<String> existingQuestions = questionRepository.findExistingQuestions(
+                request.getTopic(),
+                request.getDifficulty(),
+                generatedQuestions
+        );
+        Set<String> existingSet = Set.copyOf(existingQuestions);
 
         List<QuestionEntity> entities = generatedQuestions.stream()
+                .filter(question -> !existingSet.contains(question))
                 .map(question -> QuestionEntity.builder()
                         .question(question)
                         .topic(request.getTopic())
@@ -48,8 +59,22 @@ public class QuestionServiceImpl implements QuestionService {
                         .build())
                 .toList();
 
-        List<QuestionResponse> responses = questionRepository.saveAllAndFlush(entities)
+        if (!entities.isEmpty()) {
+            questionRepository.saveAllAndFlush(entities);
+        }
+
+        Map<String, QuestionEntity> questionEntityMap = questionRepository
+                .findByTopicAndDifficultyAndQuestionIn(
+                        request.getTopic(),
+                        request.getDifficulty(),
+                        generatedQuestions
+                )
                 .stream()
+                .collect(Collectors.toMap(QuestionEntity::getQuestion, Function.identity(), (left, right) -> left));
+
+        List<QuestionResponse> responses = generatedQuestions.stream()
+                .map(questionEntityMap::get)
+                .filter(entity -> entity != null)
                 .map(this::toResponse)
                 .toList();
 

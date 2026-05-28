@@ -12,7 +12,13 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.Instant;
 
 @Entity
-@Table(name = "questions")
+@Table(
+        name = "questions",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_questions_topic_difficulty_question",
+                        columnNames = {"topic", "difficulty", "question"})
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
