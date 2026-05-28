@@ -1,5 +1,6 @@
 package com.krish.ai.interviewgenerator.service.impl;
 
+import com.krish.ai.interviewgenerator.constants.AppConstants;
 import com.krish.ai.interviewgenerator.service.QuestionValidationService;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +42,12 @@ public class QuestionValidationServiceImpl implements QuestionValidationService 
             if (question == null || question.isBlank()) {
                 throw new IllegalStateException("AI returned invalid question format");
             }
-            if (question.length() < 12 || question.length() > 300) {
+
+            String normalizedQuestion = question.trim();
+            int length = normalizedQuestion.length();
+
+            if (length < AppConstants.Validation.QUESTION_MIN_LENGTH
+                    || length > AppConstants.Validation.QUESTION_MAX_LENGTH) {
                 throw new IllegalStateException("AI returned question with invalid length");
             }
         }
