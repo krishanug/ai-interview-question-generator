@@ -44,7 +44,6 @@ flowchart TD
 - Java 17
 - Spring Boot 3.5
 - Spring AI (Gemini)
-- LangChain4j (structured AI ecosystem support)
 - PostgreSQL
 - Redis / Valkey-compatible Key Value
 - Spring Data JPA
@@ -240,3 +239,7 @@ docker compose up -d
 - Security baseline:
   - Never commit `.env`.
   - Rotate compromised API keys immediately.
+
+## Future Enhancements
+- Introduce LangChain4j for a more formal generation/evaluation orchestration layer
+- Add AI provider fallback support for resilience
